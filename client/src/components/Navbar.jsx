@@ -7,7 +7,7 @@ import "../styles/navbar.scss";
 import {Link, useNavigate} from "react-router-dom";
 import {setLogout} from "../redux/state";
 
-export const Navbar = () => {
+const Navbar = () => {
     const [dropdownMenu, setDropDownMenu] = useState(false);
     
     const user = useSelector((state) => state.user);
@@ -37,7 +37,7 @@ export const Navbar = () => {
                     <a href='/login' className="host">Become A Host</a>
                 )}
 
-                <button className='navbar_right_account' onClick={() => setDropDownMenu(true)}>
+                <button className='navbar_right_account' onClick={() => setDropDownMenu(!dropdownMenu)}>
                         <Menu sx={{ color: variables.darkGrey }} />
                     {!user ? (
                         <Person sx={{ color: variables.darkGrey }} />

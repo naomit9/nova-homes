@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 
-const user = require("../models/user");
+const User = require("../models/user");
 
 /* Configuration Multer for file upload */
 const storage = multer.diskStorage ({
@@ -34,7 +34,7 @@ router.post("/register", upload.single("profileImage"), async (req, res) => {
         const profileImagePath = profileImage.path;
 
         /* Check if the user exists */
-        const existingUser = await user.findOne({email});
+        const existingUser = await User.findOne({email});
         if(existingUser) {
             return res.status(409).json({message: "User already exists!"})
         }
@@ -43,7 +43,7 @@ router.post("/register", upload.single("profileImage"), async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt)
 
         /* Create a new user */
-        const newUser = new user({
+        const newUser = new User({
             firstName,
             lastName,
             email,
@@ -73,20 +73,20 @@ router.post("/login", async(req, res) => {
         // Take information from the login form
         const {email, password} = req.body;
         //Check if the user exists
-        const user = await user.findOne({email});
-        if(!user) {
+        const foundUser = await User.findOne({email});
+        if(!foundUser) {
             return res.status(409).json({message: "Use doesn't exist!"})
         }
         /* Compare the password with the hashed password */
-        const isMatch = await bcrypt.compare(password, user.password)
+        const isMatch = await bcrypt.compare(password, foundUser.password)
         if(!isMatch) {
             return res.status(400).json({message: "Invalid Credentials"})
         }
         /* Generate JWT Token */
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
-        delete user.password
+        const token = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET)
+        delete foundUser.password
 
-        res.status(200).json({ token, user})
+        res.status(200).json({ token, user: foundUser})
     }
     catch(err) {
         console.log(err);
